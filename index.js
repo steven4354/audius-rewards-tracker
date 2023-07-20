@@ -33,8 +33,12 @@ let transporter = nodemailer.createTransport({
 });
 
 // Schedule a task to run every day at 5pm PT
+// 0 17 * * *
+
+// Schedule a task to run every minute
+// 0 * * * *
 cron.schedule(
-  "0 17 * * *",
+  "0 * * * *",
   async () => {
     const lastClaimedFor = await contract.methods
       .lastClaimedFor(accountAddress)
@@ -44,7 +48,7 @@ cron.schedule(
     // Send an email with the last claimed for information
     let mailOptions = {
       from: process.env.EMAIL,
-      to: "recipient@example.com",
+      to: process.env.RECIPIENT_EMAIL,
       subject: "Last Claimed For Information",
       text: `Last claimed for: ${lastClaimedFor}`,
     };
