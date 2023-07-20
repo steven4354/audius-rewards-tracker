@@ -36,28 +36,34 @@ let transporter = nodemailer.createTransport({
 });
 console.log('Transporter object created');
 
-// Schedule a task to run every day at 5pm PT
-// 0 17 * * *
-
 // Schedule a task to run every minute
-// * * * * *
-
 cron.schedule(
   process.env.PROD ? "0 17 * * *" : "* * * * *",
   async () => {
     try {
       console.log('Task started');
-      const lastClaimedFor = await contract.methods
+      const lastClaimedBlock = await contract.methods
         .lastClaimedFor(accountAddress)
         .call();
-      console.log(`Last claimed for: ${lastClaimedFor}`);
+
+      // Get the block details
+      const block = await web3.eth.getBlock(lastClaimedBlock);
+      const timestamp = block.timestamp;
+
+      // Convert the timestamp to a Date object
+      const date = new Date(timestamp * 1000);
+
+      // Format the date as a string
+      const dateString = date.toLocaleString("en-US", { timeZone: "America/Los_Angeles" });
+
+      console.log(`Last claimed for block: ${lastClaimedBlock}, timestamp: ${dateString}`);
 
       // Send an email with the last claimed for information
       let mailOptions = {
         from: process.env.EMAIL,
         to: process.env.RECIPIENT_EMAIL,
         subject: "Last Claimed For Information",
-        text: `Last claimed for: ${lastClaimedFor}`,
+        text: `Last claimed for block: ${lastClaimedBlock}, timestamp: ${dateString}, prod: ${process.env.PROD}`,
       };
 
       transporter.sendMail(mailOptions, function (error, info) {
