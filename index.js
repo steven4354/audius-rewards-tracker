@@ -43,7 +43,7 @@ console.log('Transporter object created');
 // * * * * *
 
 cron.schedule(
-  "0 17 * * *",
+  process.env.PROD ? "0 17 * * *" : "* * * * *",
   async () => {
     try {
       console.log('Task started');
